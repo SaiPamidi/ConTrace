@@ -1,0 +1,18 @@
+Database
+
+primary key - 
+
+
+StudentInfo(StudentId, LastName, FirstName, Age ... ... ) 
+
+FacultyInfo(FacultyId, LastName, FirstName, Age ..... ..)
+
+CourseInfo(CourseId, CourseName, .....)
+
+ClassInfo(CourseId, SectionNo, FacultyId, startTime, endTime, RoomID, M, T, W,Thu, F, StudentCapacity) - 90% - 100%
+
+ScheduleInfo(StudentId, CourseId, Section no, seat no)
+
+RoomInfo(RoomId, buildingNo, roomNo, l,w, roomCapacity)
+
+
