@@ -1,0 +1,7 @@
+
+StudentInfo(StudentId,LastName,FirstName)
+FacultyInfo(FacultyId,LastName,FirstName)
+CourseInfo(CourseId,CourseName)
+RoomInfo(RoomId,BuildingName,RoomNo,Length,Width,StudentCapacity)
+ClassInfo(CourseId,SectionNo,FacultyId,startTime,endTime,RoomId,m,t,w,r,f,StudentCapacity)
+ScheduleInfo(StudentId,CourseId,SectionNo,SeatNo)
