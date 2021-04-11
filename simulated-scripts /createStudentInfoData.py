@@ -4,11 +4,11 @@ import string
 
 num_student = 5000
 student_id = 0
-rowList = [['StudentId', 'LastName', 'FirstName']]
+rowList = [['StudentId', 'LastName', 'FirstName', 'Age']]
 for i in range(num_student):
     letters = string.ascii_lowercase
     rowList.append([student_id, ''.join(random.choice(letters) for i in range(
-        10)), ''.join(random.choice(letters) for i in range(10))])
+        10)), ''.join(random.choice(letters) for i in range(10)), random.randint(18, 22)])
     student_id += 1
 with open('StudentInfo.csv', 'w', newline='') as file:
     writer = csv.writer(file)
