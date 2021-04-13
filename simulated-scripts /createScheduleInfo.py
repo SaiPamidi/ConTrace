@@ -2,6 +2,7 @@ import random
 import csv
 
 data = list(csv.reader(open('../simulated-data/ClassInfo.csv')))[1:]
+print(data)
 roomInfo = list(csv.reader(open('../simulated-data/RoomInfo.csv')))[1:]
 roomCapacity = {}
 for i in range(len(roomInfo)):
@@ -46,7 +47,7 @@ for i in studentList:
         c2 = True
         c3 = True
         while(c1 or c2 or c3):
-            print(i)
+            # print(i)
             c1 = False
             c2 = False
             c3 = False
@@ -74,20 +75,20 @@ for i in studentList:
                 studentTimeSchedule[i][d][classTime + 1] += 1
         # ScheduleInfo(StudentId, CourseId, Section no, seat no)
         scheduleInfo.append(
-            [i, classInfo[0], classInfo[1], (int(roomCapacity[classInfo[5]]) - data[indx][7]) + 1])
+            [i, classInfo[0], classInfo[1], int(roomCapacity[classInfo[5]]) - data[indx][7] + 1])
 
         data[indx][7] -= 1
         if data[indx][7] == 0:
             print('here')
             del data[indx]
 # print(scheduleInfo)
-print(studentTimeSchedule)
+# print(studentTimeSchedule)
 for s in studentTimeSchedule:
     for d in studentTimeSchedule[s]:
         for i in studentTimeSchedule[s][d]:
             if i > 1:
                 print(True)
-with open('simulated-data/ScheduleInfo.csv', 'w', newline='') as file:
+with open('../simulated-data/ScheduleInfo.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerows(scheduleInfo)
 

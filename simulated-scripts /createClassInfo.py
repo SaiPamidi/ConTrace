@@ -108,6 +108,6 @@ for f in facultyTimeSchedule:
         for i in facultyTimeSchedule[f][d]:
             if i > 1:
                 print(True)
-with open('simulated-data/ClassInfo.csv', 'w', newline='') as file:
+with open('../simulated-data/ClassInfo.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerows(data)
