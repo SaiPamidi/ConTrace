@@ -4,7 +4,7 @@ import csv
 facultyNum = 150
 roomNum = 30
 facultyTimeSchedule = {}
-roomInfo = list(csv.reader(open('RoomInfo.csv')))[1:]
+roomInfo = list(csv.reader(open('../simulated-data/RoomInfo.csv')))[1:]
 roomCapacity = {}
 for i in range(len(roomInfo)):
     roomCapacity[int(roomInfo[i][0])] = roomInfo[i][6]
@@ -26,18 +26,26 @@ conversionTime = {0: '8:10', 1: '9:10', 2: '10:10', 3: '11:10',
 
 
 classInfo = []
+#data = [['CourseId', 'SectionNo', 'FacultyId', 'startTime', 'endTime',
+#         'RoomID', 'm', 't', 'w', 'r', 'f', 'StudentCapacity']]
 data = [['CourseId', 'SectionNo', 'FacultyId', 'startTime', 'endTime',
-         'RoomID', 'm', 't', 'w', 'r', 'f', 'StudentCapacity']]
+         'RoomID', 'Days', 'StudentCapacity']]
 
 
 def getDays(arr):
     days = ['m', 't', 'w', 'r', 'f']
-    res = []
+    res = 0
+    # res = []
+    # for i in days:
+    #     if i in arr:
+    #         res.append(1)
+    #     else:
+    #         res.append(0)
     for i in days:
         if i in arr:
-            res.append(1)
+            res = (res << 1) + 1
         else:
-            res.append(0)
+            res = res << 1
     return res
 
 
@@ -51,7 +59,7 @@ for i in range(0, facultyNum):
         c2 = True
         c3 = True
         while(c1 or c2 or c3):
-            print('here', i)
+            #print('here', i)
             c1 = False
             c2 = False
             c3 = False
@@ -89,17 +97,17 @@ for i in range(0, facultyNum):
 
         # print(conversionTime[classTime + classOption[1]])
         data.append([course, s, i, conversionTime[classTime], conversionTime[classTime + classOption[1]], room] +
-                    getDays(classOption[0]) + [roomCapacity[room]])
+                    [getDays(classOption[0])] + [roomCapacity[room]])
 
 # ClassInfo(CourseId, SectionNo, FacultyId, startTime, endTime, RoomID, M, T, W,Thu, F, StudentCapacity)
 
 # print(roomTimeSchedule)
-print(facultyTimeSchedule)
+#print(facultyTimeSchedule)
 for f in facultyTimeSchedule:
     for d in facultyTimeSchedule[f]:
         for i in facultyTimeSchedule[f][d]:
             if i > 1:
                 print(True)
-"""with open('ClassInfo.csv', 'w', newline='') as file:
+with open('ClassInfo.csv', 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerows(data)"""
+    writer.writerows(data)
