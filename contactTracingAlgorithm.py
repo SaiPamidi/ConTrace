@@ -1,12 +1,26 @@
 import sqlite3 as sql
 from sqlite3 import Error
 
-InfectedList = [{'ID': 4, 'TimeOfInfrection': 1618786167.3532438}, {
-    'ID': 2, 'TimeOfInfrection': 1618786167.3532438}, {'ID': 3, 'TimeOfInfrection': 1618786167.3532438}]
+InfectedList = [{'ID': 4, 'TimeOfInfection': 't Apr 20 10:38:36 2021'}, {
+    'ID': 2, 'TimeOfInfection': 'w Apr 21 12:38:36 2021'}, {'ID': 3, 'TimeOfInfection': 'r Apr 23 4:38:36 2021'}]
+
+days = ['m', 't', 'w', 'r', 'f']
+days_convert = {'m': 1, 't': 2, 'w': 3, 'r': 4, 'f': 5}
 
 StudentsProbOfInfection = {}
 for student_id in range(0, 5000):
     StudentsProbOfInfection[student_id] = 0
+
+
+def getDays(num):
+    gate = 1
+    arr = []
+    for i in days[::-1]:
+        res = num & gate
+        if res == 1:
+            arr.append(i)
+        num >> 1
+    return arr
 
 
 def create_connection(db_name):
@@ -16,6 +30,14 @@ def create_connection(db_name):
         return conn
     except Error as e:
         print(e)
+
+
+def get_class_info(course_id, section_no, conn):
+    cur = conn.cursor()
+    cur.execute(''' SELECT startTime,Days FROM ClassInfo WHERE CourseId = ? AND SectionNo = ?''',
+                (course_id, section_no))
+    res = cur.fetchone()
+    return res
 
 
 def get_classes(student_id, conn):
@@ -34,6 +56,22 @@ def get_infected_neighbors(student_id, course_id, section_no, conn):
     return cur.fetchall()
 
 
+def isClassAfterInfected(student_timeOfInfection, day_num, start_time):
+    class_days = getDays(day_num)
+    date_time = student_timeOfInfection.split()
+    day = date_time[0]
+    time_infected = date_time[3].split(':')
+    time_min_infection = int(
+        time_infected[0])*60 + int(time_infected[1])
+    time_class = start_time.split(':')
+    time_min_class = int(time_class[0])*60 + int(time_class[1])
+    if time_min_infection >= time_min_class:
+        for d in class_days:
+            if days_convert[d] >= days_convert[day]:
+                return True
+    return False
+
+
 def DirectContactTracing(InfectedList, conn):
     for student in InfectedList:
         StudentsProbOfInfection[student['ID']] = 100
@@ -41,13 +79,17 @@ def DirectContactTracing(InfectedList, conn):
         for c in classes:
             course_id = c[0]
             section_no = c[1]
-            infected_neighbors = get_infected_neighbors(
-                student['ID'], course_id, section_no, conn)
-            for n in infected_neighbors:
-                StudentsProbOfInfection[n[0]] = max(
-                    StudentsProbOfInfection[n[0]], n[1])
+            class_info = get_class_info(course_id, section_no, conn)
+            days = class_info[1]
+            start_time = class_info[0]
+            if isClassAfterInfected(student['TimeOfInfection'], days, start_time):
+                infected_neighbors = get_infected_neighbors(
+                    student['ID'], course_id, section_no, conn)
+                for n in infected_neighbors:
+                    StudentsProbOfInfection[n[0]] = max(
+                        StudentsProbOfInfection[n[0]], n[1])
     # print(StudentsProbOfInfection)
-    # print([i for i in StudentsProbOfInfection if StudentsProbOfInfection[i] == 100])
+    print([i for i in StudentsProbOfInfection if StudentsProbOfInfection[i] == 100])
 
 
 DirectContactTracing(InfectedList, create_connection('contact_data.db'))

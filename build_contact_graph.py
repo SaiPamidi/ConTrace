@@ -44,12 +44,12 @@ def get_probability_of_transmission(seatNo1, seatNo2, x_num_students, adj_dist_s
         return 0
 
 
-def create_edge(StudentId, NeighborId, ClassId, SectionNo, ProbTrans, conn):
+def create_edge(StudentId, NeighborId, ClassId, SectionNo, Distance, Duration, conn):
     cur3 = conn.cursor()
-    insert_info = """ INSERT INTO ContactGraph(StudentID, NeighborID, ClassID, SectionNo, ProbTrans)
-					  VALUES(?,?,?,?,?) """
+    insert_info = """ INSERT INTO ContactGraph(StudentID, NeighborID, CourseID, SectionNo, Distance,Duration)
+					  VALUES(?,?,?,?,?,?) """
     cur3.execute(insert_info, (StudentId, NeighborId,
-                               ClassId, SectionNo, ProbTrans))
+                               ClassId, SectionNo, Distance, Duration))
     conn.commit()
 
 
@@ -68,10 +68,17 @@ def add_neighbors(students_info, room_id, start_time, end_time, conn):
     for i in range(len(students_info)):
         for j in range(len(students_info)):
             if i != j:
-                probability_of_transmission = get_probability_of_transmission(
-                    students_info[i][3], students_info[j][3], x_num_students, adj_dist_student, start_time, end_time)
-                create_edge(students_info[i][0], students_info[j][0], students_info[0]
-                            [1], students_info[0][2], probability_of_transmission, conn)
+                #probability_of_transmission = get_probability_of_transmission(students_info[i][3], students_info[j][3], x_num_students, adj_dist_student, start_time, end_time)
+                seatNo1 = students_info[i][3]
+                seatNo2 = students_info[j][3]
+                contact_distance = get_distance_of_contact(
+                    seatNo1, seatNo2, x_num_students, adj_dist_student)
+                contact_duration = get_duration_of_contact(
+                    start_time, end_time)
+                print(contact_distance)
+                if contact_distance <= 72:
+                    create_edge(students_info[i][0], students_info[j][0], students_info[0]
+                                [1], students_info[0][2], contact_distance, contact_duration, conn)
 
 
 def build_graph(conn):
