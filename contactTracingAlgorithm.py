@@ -1,3 +1,4 @@
+import math
 import sqlite3 as sql
 from sqlite3 import Error
 
@@ -51,7 +52,7 @@ def get_classes(student_id, conn):
 
 def get_infected_neighbors(student_id, course_id, section_no, conn):
     cur = conn.cursor()
-    cur.execute(''' SELECT NeighborId,ProbTrans FROM ContactGraph WHERE StudentId = ? AND ClassId = ? AND SectionNo = ? ''',
+    cur.execute(''' SELECT NeighborId,Distance,Duration FROM ContactGraph WHERE StudentId = ? AND CourseId = ? AND SectionNo = ? ''',
                 (student_id, course_id, section_no))
     return cur.fetchall()
 
@@ -72,6 +73,26 @@ def isClassAfterInfected(student_timeOfInfection, day_num, start_time):
     return False
 
 
+def CalculateProb(distance, duration):
+    max_duration = 2.0 # in hours
+
+    if (distance < 12):
+        return 1.0
+    if (distance < 24):
+        return 0.9 + (duration / max_duration) / 10
+    if (distance < 36):
+        return 0.8 + (duration / max_duration) / 10
+    if (distance < 48):
+        return 0.7 + (duration / max_duration) / 10
+    if (distance < 60):
+        return 0.65 + (duration / max_duration) / 10
+    if (distance < 72):
+        return .60 + (duration / max_duration) / 10
+
+    return 0
+
+
+
 def DirectContactTracing(InfectedList, conn):
     for student in InfectedList:
         StudentsProbOfInfection[student['ID']] = 100
@@ -87,9 +108,9 @@ def DirectContactTracing(InfectedList, conn):
                     student['ID'], course_id, section_no, conn)
                 for n in infected_neighbors:
                     StudentsProbOfInfection[n[0]] = max(
-                        StudentsProbOfInfection[n[0]], n[1])
-    # print(StudentsProbOfInfection)
-    print([i for i in StudentsProbOfInfection if StudentsProbOfInfection[i] == 100])
+                        StudentsProbOfInfection[n[0]], CalculateProb(n[1], n[2]))
+    print(StudentsProbOfInfection)
+    #print([(i, StudentsProbOfInfection[i]) for i in StudentsProbOfInfection if StudentsProbOfInfection[i] > 0])
 
 
 DirectContactTracing(InfectedList, create_connection('contact_data.db'))
