@@ -3,7 +3,6 @@ from sqlite3 import Error
 import datetime
 from contactTracingAlgorithm import *
 
-
 # seperate susceptible, exposed and infected sets
 
 
@@ -14,8 +13,8 @@ conversionTime2 = {'8:10': 0, '9:10': 1, '10:10': 2, '11:10': 3,
 
 
 class Node:
-    def __init__(self, id, state, time_of_infection, prob_of_infection):
-        self.id = id
+    def __init__(self, sid, state, time_of_infection, prob_of_infection):
+        self.sid = sid
         self.state = state
         self.time_of_infection = time_of_infection
         self.prob_of_infection = prob_of_infection
@@ -32,7 +31,7 @@ def check_exposed_is_infectious(student_nodes, cur_date, cur_time, incubationPer
             date_of_infection = datetime.date(
                 cur_node.time_of_infection['year'], cur_node.time_of_infection['month'], cur_node.time_of_infection['day'])
             time_of_infection = cur_node.time_of_infection['time']
-            if (date_of_infection + datetime.timedelta(incubationPeriod) >= cur_date) and conversionTime2[time_of_infection] >= conversionTime2[cur_time]:
+            if (date_of_infection + datetime.timedelta(incubationPeriod) <= cur_date) and conversionTime2[time_of_infection] <= conversionTime2[cur_time]:
                 student_nodes[student_id].state = 'infected'
                 new_date_of_infection = date_of_infection + \
                     datetime.timedelta(incubationPeriod)
@@ -60,16 +59,15 @@ def get_infected_neighbors(student_id, conn):
 
 
 def forward_trace(student_nodes, cur_date, cur_time, incubationPeriod, conn):
-    week_num = cur_date.weekday()
     check_exposed_is_infectious(
         student_nodes, cur_date, cur_time, incubationPeriod)
-    if week_num in [5, 6]:
-        return
+    week_num = cur_date.weekday()
     for student_id in student_nodes:
         cur_node = student_nodes[student_id]
         if cur_node.state == 'infected':
             neighbors = get_infected_neighbors(
                 student_id, conn)
+            # print(len(neighbors))
             for n in neighbors:
                 neighbor_id = n[0]
                 course_id = n[1]
@@ -83,7 +81,9 @@ def forward_trace(student_nodes, cur_date, cur_time, incubationPeriod, conn):
                 if (conversionTime2[start_time] == conversionTime2[cur_time]) and getDays(days)[week_num] == 1 \
                         and neighbor_state != 'infected':
                     # student_nodes[neighbor_id].prob_of_infection = (student_nodes[neighbor_id].state == 'susceptible') ? (true): (false)
-                    prob_infection = CalculateProb(distance, duration)
+                    prob_transmission = CalculateProb(distance, duration)
+                    prob_infection = student_nodes[student_id].prob_of_infection * \
+                        prob_transmission
                     if neighbor_state == 'susceptible' or student_nodes[neighbor_id].prob_of_infection < prob_infection:
                         student_nodes[neighbor_id].state = 'exposed'
                         year = cur_date.year
@@ -101,7 +101,8 @@ def IndirectContactTracing(InfectedList, incubationPeriod, conn):
     num_students = 5000
     student_nodes = {}
     for student_id in range(0, num_students):
-        student_nodes[student_id] = Node(id, 'sucpetible', 0, 0)
+        student_nodes[student_id] = Node(
+            student_id, 'sucpetible', {'year': 0, 'month': 0, 'day': 0, 'time': ''}, 0)
 
     # sort Infected List - maybe
 
@@ -119,11 +120,26 @@ def IndirectContactTracing(InfectedList, incubationPeriod, conn):
     cur_date = earliest_infection_date
 
     while(cur_date != present_date):
+        # print('here')
+        print('E', len(
+            [student_nodes[n].state for n in student_nodes if student_nodes[n].state == 'exposed']))
+        print('S', len(
+            [student_nodes[n].state for n in student_nodes if student_nodes[n].state == 'infected']))
+        week_num = cur_date.weekday()
+
+        if week_num in [5, 6]:
+            print("weekend\n")
+            cur_date = cur_date + datetime.timedelta(1)
+            continue
+
         for i in range(9):
             cur_time = conversionTime1[i]
             forward_trace(student_nodes, cur_date,
                           cur_time, incubationPeriod, conn)
         cur_date = cur_date + datetime.timedelta(1)
+
+    print([(student_nodes[n].sid, student_nodes[n].prob_of_infection)
+           for n in student_nodes if student_nodes[n].prob_of_infection > .50])
 
 
 conn = create_connection('contact_data.db')
