@@ -104,9 +104,9 @@ def is_class_today(course_id, section_no, cur_time, week_num, conn):
 
     day_mask = 1 << (4 - week_num)
 
-    print(bin(class_days[0]))
-    print(bin(day_mask))
-    print(bin(class_days[0] & day_mask))
+    #print(bin(class_days[0]))
+    #print(bin(day_mask))
+    #print(bin(class_days[0] & day_mask))
 
     return class_days != None and (class_days[0] & day_mask)
 
@@ -157,6 +157,23 @@ def forward_trace(student_nodes, cur_date, cur_time, incubationPeriod, infected_
                     'month': cur_date.month, 'day': cur_date.day, 'time': cur_time}, prob_infection)
 
 
+def update_infected(infected_students, InfectedList, cur_date):
+    new_list = []
+    for student in InfectedList:
+        year = student['TimeOfInfection']['year']
+        month = student['TimeOfInfection']['month']
+        day = student['TimeOfInfection']['day']
+        toi = datetime.date(year, month, day)
+
+        if cur_date >= toi:
+            infected_students.add(student['ID'])
+        else:
+            new_list.append(student)
+
+    return new_list
+
+        
+
 def IndirectContactTracing(InfectedList, incubationPeriod, conn):
 
     num_students = 5000
@@ -171,7 +188,6 @@ def IndirectContactTracing(InfectedList, incubationPeriod, conn):
         earliest_infection['year'], earliest_infection['month'], earliest_infection['day'])
 
     for student in InfectedList:
-        infected_students.add(student['ID'])
         student_nodes[student['ID']] = Node(student['ID'], INFECTED, student['TimeOfInfection'], 1.0)
 
     present_date = datetime.date.today()
@@ -188,6 +204,8 @@ def IndirectContactTracing(InfectedList, incubationPeriod, conn):
         if week_num in [5, 6]:
             cur_date = cur_date + datetime.timedelta(1)
             continue
+
+        InfectedList = update_infected(infected_students, InfectedList, cur_date)
 
         for i in range(9):
             cur_time = conversionTime1[i]
