@@ -58,7 +58,16 @@ def create_schedule_entry(conn, info):
     conn.commit()
     return cur.lastrowid
 
+def pop_table(conn, file, fun):
+	first = True
 
+	with open(file) as f:
+		reader = csv.reader(f)
+		for row in reader:
+			if first:
+				first = False
+			else:
+				fun(conn, row)
 
 def main():
 	# first = True
