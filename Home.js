@@ -30,20 +30,17 @@ class Home extends Component{
 		this.setState({ text });
 	}
 	
-	const FileUploader = () => {
-		const fileDrop = (files: File[]) => {
-			const formData = new FormData();
+	fileUploader = (files) => {
+		console.log("Trying to call api");
+		const formData = new FormData();
 
-			const file: File = files[0];
-			formData.append("file", file);
+		const file = files[0];
+		formData.append(file.name, file);
 
-			fetch("http://localhost:5000/upload", {
-				method: "POST",
-				body: formData,
-			}).then((res) => {
-				console.log(res.text);
-			});
-		};
+		fetch("/analyze", {
+			method: "POST",
+			body: formData,
+		}).then(response => response.json().then(console.log(response.text)));
 	}
 	
 	render() {
@@ -54,14 +51,14 @@ class Home extends Component{
 			<ButtonAppBar heading={`Upload`}/>
 			</div>
 		  <h1><center>Submit Files</center></h1>
-		  <DropzoneArea
+		  	<DropzoneArea
 			acceptedFiles={[".csv, text/csv, application/vnd.ms-excel, application/csv, text/x-csv, application/x-csv, text/comma-separated-values, text/x-comma-separated-values"]}
 			onChange={this.handleChange.bind(this)}
 			showFileNames
 			dropzoneText="Upload StudentInfo(StudentId,LastName,FirstName)"
 			showAlerts={false}
 			filesLimit={1}
-			onDrop={FileUploader}/>
+			onDrop={this.fileUploader}/>
 			<br/>
 			<DropzoneArea
 			acceptedFiles={[".csv, text/csv, application/vnd.ms-excel, application/csv, text/x-csv, application/x-csv, text/comma-separated-values, text/x-comma-separated-values"]}
@@ -103,7 +100,7 @@ class Home extends Component{
 			showAlerts={false}
 			filesLimit={1}/>
 			<br/>
-			<center><Button onClick={ () => { this.changeText("Loading...")} }(variant="contained" color="primary">
+			<center><Button onClick={ () => { this.changeText("Loading...")} } variant="contained" color="primary">
 				{text}
 			</Button></center>
 			</div>
