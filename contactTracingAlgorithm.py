@@ -13,7 +13,7 @@ for student_id in range(0, 5000):
     StudentsProbOfInfection[student_id] = 0
 
 
-def getDays(num):
+def getDays1(num):
     gate = 1
     arr = []
     for i in days[::-1]:
@@ -50,7 +50,7 @@ def get_classes(student_id, conn):
     return classes
 
 
-def get_infected_neighbors(student_id, course_id, section_no, conn):
+def get_infected_neighbors1(student_id, course_id, section_no, conn):
     cur = conn.cursor()
     cur.execute(''' SELECT NeighborId,Distance,Duration FROM ContactGraph WHERE StudentId = ? AND CourseId = ? AND SectionNo = ? ''',
                 (student_id, course_id, section_no))
@@ -58,7 +58,7 @@ def get_infected_neighbors(student_id, course_id, section_no, conn):
 
 
 def isClassAfterInfected(student_timeOfInfection, day_num, start_time):
-    class_days = getDays(day_num)
+    class_days = getDays1(day_num)
     date_time = student_timeOfInfection.split()
     day = date_time[0]
     time_infected = date_time[3].split(':')
@@ -74,7 +74,7 @@ def isClassAfterInfected(student_timeOfInfection, day_num, start_time):
 
 
 def CalculateProb(distance, duration):
-    max_duration = 2.0 # in hours
+    max_duration = 2.0  # in hours
 
     if (distance < 12):
         return 1.0
@@ -92,7 +92,6 @@ def CalculateProb(distance, duration):
     return 0
 
 
-
 def DirectContactTracing(InfectedList, conn):
     for student in InfectedList:
         StudentsProbOfInfection[student['ID']] = 100
@@ -104,7 +103,7 @@ def DirectContactTracing(InfectedList, conn):
             days = class_info[1]
             start_time = class_info[0]
             if isClassAfterInfected(student['TimeOfInfection'], days, start_time):
-                infected_neighbors = get_infected_neighbors(
+                infected_neighbors = get_infected_neighbors1(
                     student['ID'], course_id, section_no, conn)
                 for n in infected_neighbors:
                     StudentsProbOfInfection[n[0]] = max(
@@ -113,4 +112,4 @@ def DirectContactTracing(InfectedList, conn):
     #print([(i, StudentsProbOfInfection[i]) for i in StudentsProbOfInfection if StudentsProbOfInfection[i] > 0])
 
 
-DirectContactTracing(InfectedList, create_connection('contact_data.db'))
+#DirectContactTracing(InfectedList, create_connection('contact_data.db'))
