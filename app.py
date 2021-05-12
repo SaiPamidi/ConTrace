@@ -6,6 +6,7 @@ import logging
 import os
 import shutil
 from populate_db import *
+from build_contact_graph import *
 
 app = Flask(__name__)
 app.config['UPLOAD_PATH'] = './resources'
@@ -89,5 +90,14 @@ def infected_upload():
 		path = app.config['UPLOAD_PATH'] + '/InfectedStudents.csv'
 		f.save(path)
 		return "test"
+
+@app.route('/build_graph', methods=['GET', 'POST'])
+def flask_build_graph():
+	if request.method == 'GET':
+		print("Building graph")
+		conn = create_connection('./contact_data.db')
+		build_graph(conn)
+		return "finished"
+
 
 CORS(app, expose_headers = 'Authorization')

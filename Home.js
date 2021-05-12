@@ -123,6 +123,14 @@ class Home extends Component{
 			body: formData,
 		}).then(response => response.json().then(console.log(response.text)));
 	}
+	buildGraph = () => {
+		console.log("Building graph")
+		this.changeText("Loading...")
+		fetch("/build_graph", {
+			method: "GET",
+		}).then(response => response.json().then(console.log(response.text)));
+		this.changeText("Done!")
+	}
 	
 	render() {
 		const { text } = this.state
@@ -195,7 +203,7 @@ class Home extends Component{
 			filesLimit={1}
 			onDrop={this.fileUploader7}/>
 			<br/>
-			<center><Button onClick={ () => { this.changeText("Loading...")} } variant="contained" color="primary">
+			<center><Button onClick={ this.buildGraph } variant="contained" color="primary">
 				{text}
 			</Button></center>
 			</div>

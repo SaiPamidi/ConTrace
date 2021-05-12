@@ -128,13 +128,21 @@ def create_db():
 							"SectionNo"	INTEGER NOT NULL,
 							"SeatNo"	INTEGER NOT NULL)'''
 	
+	contactGraph = ''' CREATE TABLE "ContactGraph"(
+		"StudentID" INTEGER NOT NULL,
+		"NeighborID" INTEGER NOT NULL,
+		"CourseID" INTEGER NOT NULL,
+		"SectionNo" INTEGER NOT NULL,
+		"Distance" INTEGER NOT NULL,
+		"Duration" INTEGER NOT NULL)'''
+	
 	create_table(conn, student)
 	create_table(conn, faculty)
 	create_table(conn, course)
 	create_table(conn, room)
 	create_table(conn, classes)
 	create_table(conn, schedule)
-
+	create_table(conn,contactGraph)
 	conn.close()
 				
 
