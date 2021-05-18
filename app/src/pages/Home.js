@@ -4,7 +4,7 @@ import { DropzoneArea } from 'material-ui-dropzone';
 import 'fontsource-roboto';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import ButtonAppBar from './buttonAppBar.js';
+import { Route, Redirect, Switch, BrowserRouter as Router, Link } from 'react-router-dom';
 
 import '../App.css';
 
@@ -13,7 +13,8 @@ class Home extends Component {
 		super(props);
 		this.state = {
 			files: [],
-			text: "Run ConTrace"
+			text: "Run ConTrace",
+			student_prob: {}
 		};
 	}
 	handleChange(files) {
@@ -108,23 +109,24 @@ class Home extends Component {
 			body: formData,
 		});
 	}
+	setStudentProb = (data) => {
+		console.log(data)
+		this.setState({ student_prob: data })
+
+	}
 	buildGraph = () => {
-		this.changeText("Loading...");
+		console.log("Building graph")
+		this.changeText("Loading...")
 		fetch("/build_graph", {
 			method: "GET",
-		}).then(
-			response => response.json()
-		).then(data => console.log(data.length));
-		this.changeText("Done!");
+		}).then(response => response.json().then(data => { this.setStudentProb(data) }));
+		this.changeText("Done!")
 	}
 
 	render() {
 		const { text } = this.state
 		return (
 			<div className="Home">
-				<div>
-					<ButtonAppBar heading={`Upload`} />
-				</div>
 				<h1><center>Submit Files</center></h1>
 				<DropzoneArea
 					acceptedFiles={[".csv, text/csv, application/vnd.ms-excel, application/csv, text/x-csv, application/x-csv, text/comma-separated-values, text/x-comma-separated-values"]}
@@ -192,6 +194,10 @@ class Home extends Component {
 				<center><Button onClick={this.buildGraph} variant="contained" color="primary">
 					{text}
 				</Button></center>
+				<Link to={{
+					pathname: '/singlestudent',
+					state: [{ student_prob: this.state.student_prob }]
+				}}> CONTINUE </Link>
 			</div>
 		);
 	}

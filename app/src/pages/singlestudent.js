@@ -44,7 +44,7 @@ class SingleStudent extends Component {
     };
   }
   /*{ from: 1, to: 2 },
-          { from: 1, to: 3 },
+          { from: 1, to: 3, color: "#FF0000" },
           { from: 2, to: 4 },
           { from: 2, to: 5 }*/
   /*{ id: 1, label: "Node 1" },
@@ -64,7 +64,22 @@ class SingleStudent extends Component {
   };
 
   handleChange = (newData) => {
+    //console.log(this.props.location.state[0].student_prob);
     this.setState({ data: newData })
+  }
+
+  setColor = (node) => {
+    var student_prob = this.props.location.state[0].student_prob
+    var infection_prob = student_prob[node.id]
+    if (infection_prob < 0.35) {
+      node.color = '#F88379'
+    }
+    else if (infection_prob < 0.70) {
+      node.color = '#CD5C5C'
+    }
+    else {
+      node.color = '#CF352E'
+    }
   }
 
   parseNodes = (output) => {
@@ -76,10 +91,12 @@ class SingleStudent extends Component {
     var new_nodes = []
     var new_edges = []
     for (var node in output.nodes) {
+      this.setColor(output.nodes[node]);
       console.log(output.nodes[node]);
       new_nodes.push(output.nodes[node]);
     }
     for (var node in output.edges) {
+      output.edges[node].length = output.edges[node].length * 4;
       console.log(output.edges[node]);
       new_edges.push(output.edges[node]);
     }
