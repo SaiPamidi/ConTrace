@@ -88,7 +88,7 @@ def testing_rec_lists(student_nodes, conn):
         degree = get_degree(student_id, conn)
         age = get_age(student_id, conn)
         student_list.append(StudentInfo(
-            student_id, student_nodes[student_id].prob_of_infection, degree, age, tier))
+            student_id, student_nodes[student_id].prob_of_infection, degree[0], age[0], tier))
     student_list = sorted(
         student_list, key=lambda x: (x.tier, x.degree, x.age), reverse=True)
     return student_list
@@ -101,7 +101,7 @@ def check_degree(conn):
     return cur.fetchall()
 
 
-conn = create_connection('contact_data.db')
+'''conn = create_connection('contact_data.db')
 # print(get_degree(conn))
 # print(check_degree(conn))
 start = time.time()
@@ -114,3 +114,4 @@ print("Execution Time: %d seconds" % (stop - start))
 print(testing_rec_lists(student_nodes, conn))
 
 conn.close()
+s'''

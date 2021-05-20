@@ -1,5 +1,6 @@
 from IndirectContactTracing import *
 from build_contact_graph import *
+from RecTestingList import*
 from populate_db import *
 from support import *
 import shutil
@@ -22,6 +23,8 @@ CORS(app)
 # if os.path.exists('./contact_data.db'):
 #	os.remove('./contact_data.db')
 # create_db()
+
+student_nodes = {}
 
 
 @app.route('/student_info', methods=['GET', 'POST'])
@@ -110,7 +113,10 @@ def flask_build_graph():
         # build_graph(conn)
         InfectedList = parse_infected(
             app.config['UPLOAD_PATH'] + '/InfectedStudents.csv')
-        student_nodes = IndirectContactTracing(InfectedList, 3, conn)
+        nodes = IndirectContactTracing(InfectedList, 3, conn)
+        #print('here', nodes)
+        for s in nodes:
+            student_nodes[s] = nodes[s]
         return jsonify(student_nodes)
 
 
@@ -131,6 +137,26 @@ def flask_get_neighbors():
 
         app_dict = {"nodes": nodes, "edges": edges}
         return json.dumps(app_dict)
+
+
+@app.route('/rec_list', methods=['GET'])
+def gen_list():
+    if request.method == 'GET':
+        print("sending_list")
+        conn = create_connection('contact_data.db')
+        # print()
+        testing_list = testing_rec_lists(student_nodes, conn)
+        rows = []
+        for s in testing_list:
+            rows.append({
+                'student_id': s.student_id,
+                'risk': s.tier,
+                'prob': s.prob_of_infection,
+                'degree': s.degree,
+                'age': s.age
+            })
+
+    return {'row_data': rows}
 
 
 CORS(app, expose_headers='Authorization')

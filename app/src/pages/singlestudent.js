@@ -71,14 +71,19 @@ class SingleStudent extends Component {
   setColor = (node) => {
     var student_prob = this.props.location.state[0].student_prob
     var infection_prob = student_prob[node.id]
-    if (infection_prob < 0.35) {
-      node.color = '#F88379'
-    }
-    else if (infection_prob < 0.70) {
-      node.color = '#CD5C5C'
+    if (infection_prob != null) {
+      if (infection_prob < 0.35) {
+        node.color = '#F88379'
+      }
+      else if (infection_prob < 0.70) {
+        node.color = '#CD5C5C'
+      }
+      else {
+        node.color = '#CF352E'
+      }
     }
     else {
-      node.color = '#CF352E'
+      node.color = '#19e646'
     }
   }
 
