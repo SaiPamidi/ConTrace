@@ -3,15 +3,18 @@ import { MDBDataTable } from 'mdbreact';
 import * as mdb from 'mdb-ui-kit';
 import ReactDOM from "react-dom";
 import Graph from "react-graph-vis";
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 import ButtonAppBar from './buttonAppBar.js';
 import Button from '@material-ui/core/Button';
+import { CSVLink, CSVDownload } from "react-csv";
 
 class Recommend extends Component {
   constructor() {
     super();
     this.state = {
-      list: []
+      list: [],
+      rows: [],
+      download_data: []
     };
   }
 
@@ -21,19 +24,32 @@ class Recommend extends Component {
       method: "GET",
     }).then(
       response => response.json()
-    ).then(data => this.DatatablePage(data.row_data));
+    ).then(data => this.updateTable(data.row_data));
 
 
   }
 
+
+  updateTable = (row_data) => {
+    var new_rows = []
+    var new_csv_data = [['Student_id', 'risk', 'age', 'degree', 'prob']]
+    for (var i in row_data) {
+      new_rows.push(row_data[i])
+      new_csv_data.push([row_data[i].student_id, row_data[i].risk, row_data[i].age, row_data[i].degree, row_data[i].prob])
+    }
+    console.log(new_rows)
+    this.setState({ rows: new_rows })
+    this.setState({ download_data: new_csv_data })
+  }
+
   DatatablePage = (row_data) => {
     //console.log(row_data)
-    var new_rows = []
+    /*var new_rows = []
     for (var i in row_data) {
       new_rows.push(row_data[i])
     }
-    console.log(new_rows)
-
+    console.log(new_rows)*/
+    console.log(this.state.rows)
 
     var data = {
       columns: [
@@ -68,11 +84,11 @@ class Recommend extends Component {
           width: 100
         }
       ],
-      rows: new_rows
+      rows: this.state.rows
     };
     return <center><MDBDataTable
       scrollY
-      maxHeight="300px"
+      maxHeight="500px"
       striped
       bordered
       small
@@ -84,10 +100,12 @@ class Recommend extends Component {
     return (
       <div>
         <ButtonAppBar heading={`Recommended Actions`} />
-        {this.DatatablePage()}
+        {this.DatatablePage(this.state.rows)}
         <center><Button onClick={() => this.GenRecList()} variant="contained" color="primary">
           Run
-				</Button></center>
+				</Button>
+        </center>
+        <CSVLink data={this.state.download_data}>Download REC list</CSVLink>
       </div>
 
     );

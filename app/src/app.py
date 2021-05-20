@@ -11,6 +11,7 @@ from flask_cors import CORS
 import logging
 import os
 import json
+import csv
 
 app = Flask(__name__)
 app.config['UPLOAD_PATH'] = './resources'
@@ -114,7 +115,7 @@ def flask_build_graph():
         InfectedList = parse_infected(
             app.config['UPLOAD_PATH'] + '/InfectedStudents.csv')
         nodes = IndirectContactTracing(InfectedList, 3, conn)
-        #print('here', nodes)
+        # print('here', nodes)
         for s in nodes:
             student_nodes[s] = nodes[s]
         return jsonify(student_nodes)
@@ -147,6 +148,10 @@ def gen_list():
         # print()
         testing_list = testing_rec_lists(student_nodes, conn)
         rows = []
+        #outfile = open("../public/files/RecList.csv", "w+")
+        #outfile = open(app.config['UPLOAD_PATH'] + "/RecList.csv", "w+")
+        #writer = csv.writer(outfile)
+        #writer.writerow(['student_id', 'risk', 'prob', 'degree', 'age'])
         for s in testing_list:
             rows.append({
                 'student_id': s.student_id,
@@ -155,6 +160,9 @@ def gen_list():
                 'degree': s.degree,
                 'age': s.age
             })
+            # writer.writerow(
+            # [s.student_id, s.tier, s.prob_of_infection, s.degree, s.age])
+        # outfile.close()
 
     return {'row_data': rows}
 
