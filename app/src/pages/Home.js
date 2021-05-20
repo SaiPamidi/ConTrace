@@ -191,7 +191,7 @@ class Home extends Component {
 					filesLimit={1}
 					onDrop={this.fileUploader7} />
 				<br />
-				<center><Button onClick={() => this.buildGraph} variant="contained" color="primary">
+				<center><Button onClick={this.buildGraph} variant="contained" color="primary">
 					{text}
 				</Button></center>
 				<Link to={{
