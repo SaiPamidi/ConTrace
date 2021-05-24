@@ -5,11 +5,15 @@ import SearchBar from "material-ui-search-bar";
 import Button from '@material-ui/core/Button';
 import { v4 as uuidv4 } from 'uuid';
 
+import "../network.css";
+
 class SingleStudent extends Component {
+
   constructor() {
     super();
     this.state = {
       data: "",
+      student_nodes: {},
       options: {
         layout: {
           // hierarchical: true,
@@ -53,9 +57,13 @@ class SingleStudent extends Component {
             { id: 4, label: "Node 4" },
             { id: 5, label: "Node 5" }*/
 
-  componentDidMount() {
+  componentDidMount = async () => {
     document.addEventListener("mousedown", e => { });
     document.addEventListener("mousemove", e => { });
+    await fetch("/get_student_nodes", {
+      method: "GET",
+    }).then(response => response.json().then(data => { this.setState({ student_nodes: data }) }));
+    console.log(this.state.student_nodes)
   }
 
   events = {
@@ -69,14 +77,14 @@ class SingleStudent extends Component {
   }
 
   setColor = (node) => {
-    var student_prob = this.props.location.state[0].student_prob
-    var infection_prob = student_prob[node.id]
+    var infection_prob = this.state.student_nodes[node.id]
+    //var infection_prob = student_prob[node.id]
     if (infection_prob != null) {
       if (infection_prob < 0.35) {
         node.color = '#F88379'
       }
       else if (infection_prob < 0.70) {
-        node.color = '#CD5C5C'
+        node.color = '#FFA500'
       }
       else {
         node.color = '#CF352E'
@@ -129,6 +137,7 @@ class SingleStudent extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
 
       <div id="graph" style={{ height: "100vh" }}>
@@ -149,6 +158,7 @@ class SingleStudent extends Component {
           events={this.state.events}
         />
       </div>
+
     );
   }
 }

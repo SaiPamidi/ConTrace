@@ -14,7 +14,8 @@ class Home extends Component {
 		this.state = {
 			files: [],
 			text: "Run ConTrace",
-			student_prob: {}
+			student_prob: {},
+			upload_status: [0, 0, 0, 0, 0, 0, 0],
 		};
 	}
 	handleChange(files) {
@@ -24,107 +25,158 @@ class Home extends Component {
 	}
 
 	changeText = (text) => {
-		this.setState({ text });
+		this.setState({ text: text });
 	}
 
-	fileUploader1 = (files) => {
+	fileUploader1 = async (files) => {
+		const formData = new FormData();
+
+		const file = await files[0];
+		formData.append("file", file);
+
+		const response = await fetch("/student_info", {
+			method: "POST",
+			body: formData,
+		});
+
+		var newstatus = this.state.upload_status
+		newstatus[0] = 1
+		this.setState({ upload_status: newstatus })
+	}
+
+	fileUploader2 = async (files) => {
 		const formData = new FormData();
 
 		const file = files[0];
 		formData.append("file", file);
 
-		fetch("/student_info", {
+		const respnse = await fetch("/faculty_info", {
 			method: "POST",
 			body: formData,
 		});
+
+		var newstatus = this.state.upload_status
+		newstatus[1] = 1
+		this.setState({ upload_status: newstatus })
 	}
 
-	fileUploader2 = (files) => {
+	fileUploader3 = async (files) => {
 		const formData = new FormData();
 
 		const file = files[0];
 		formData.append("file", file);
 
-		fetch("/faculty_info", {
+		const response = await fetch("/course_info", {
 			method: "POST",
 			body: formData,
 		});
+
+		var newstatus = this.state.upload_status
+		newstatus[2] = 1
+		this.setState({ upload_status: newstatus })
 	}
 
-	fileUploader3 = (files) => {
+	fileUploader4 = async (files) => {
 		const formData = new FormData();
 
 		const file = files[0];
 		formData.append("file", file);
 
-		fetch("/course_info", {
+		const response = await fetch("/room_info", {
 			method: "POST",
 			body: formData,
 		});
+
+		var newstatus = this.state.upload_status
+		newstatus[3] = 1
+		this.setState({ upload_status: newstatus })
 	}
 
-	fileUploader4 = (files) => {
+	fileUploader5 = async (files) => {
 		const formData = new FormData();
 
 		const file = files[0];
 		formData.append("file", file);
 
-		fetch("/room_info", {
+		const response = await fetch("/class_info", {
 			method: "POST",
 			body: formData,
 		});
+
+		var newstatus = this.state.upload_status
+		newstatus[4] = 1
+		this.setState({ upload_status: newstatus })
 	}
 
-	fileUploader5 = (files) => {
+	fileUploader6 = async (files) => {
 		const formData = new FormData();
 
 		const file = files[0];
 		formData.append("file", file);
 
-		fetch("/class_info", {
+		const response = await fetch("/schedule_info", {
 			method: "POST",
 			body: formData,
 		});
-	}
 
-	fileUploader6 = (files) => {
+		var newstatus = this.state.upload_status
+		newstatus[5] = 1
+		this.setState({ upload_status: newstatus })
+	}
+	fileUploader7 = async (files) => {
 		const formData = new FormData();
 
 		const file = files[0];
 		formData.append("file", file);
 
-		fetch("/schedule_info", {
+		const response = await fetch("/infected_students", {
 			method: "POST",
 			body: formData,
 		});
-	}
-	fileUploader7 = (files) => {
-		const formData = new FormData();
 
-		const file = files[0];
-		formData.append("file", file);
-
-		fetch("/infected_students", {
-			method: "POST",
-			body: formData,
-		});
+		var newstatus = this.state.upload_status
+		newstatus[6] = 1
+		this.setState({ upload_status: newstatus })
 	}
 	setStudentProb = (data) => {
 		console.log(data)
 		this.setState({ student_prob: data })
 
 	}
-	buildGraph = () => {
+
+	buildGraph = async () => {
 		console.log("Building graph")
 		this.changeText("Loading...")
-		fetch("/build_graph", {
+		const response = await fetch("/build_graph", {
 			method: "GET",
 		}).then(response => response.json().then(data => { this.setStudentProb(data) }));
-		this.changeText("Done!")
+		this.changeText("Done")
+
+		window.location.href = "/singlestudent"
+	}
+
+	asynchHandler = () => {
+		this.buildGraph(this.changeText);
 	}
 
 	render() {
 		const { text } = this.state
+		let ready = 1;
+		let button;
+		//console.log(this.state.upload_status)
+		/*for (var i in this.state.upload_status) {
+			if (this.state.upload_status[i] == 0) {
+				ready = 0;
+				break;
+			}
+		}*/
+
+		if (ready == 1) {
+			button = <Button onClick={this.buildGraph} variant="contained" color="primary">{text}</Button>
+		}
+		else {
+			button = <Button onClick={() => alert('Uploading not complete')} variant="contained" color="primary">{text}</Button>
+		}
 		return (
 			<div className="Home">
 				<h1><center>Submit Files</center></h1>
@@ -132,7 +184,7 @@ class Home extends Component {
 					acceptedFiles={[".csv, text/csv, application/vnd.ms-excel, application/csv, text/x-csv, application/x-csv, text/comma-separated-values, text/x-comma-separated-values"]}
 					onChange={this.handleChange.bind(this)}
 					showFileNames
-					dropzoneText="Upload StudentInfo(StudentId,LastName,FirstName)"
+					dropzoneText="Upload StudentInfo(StudentId,LastName,FirstName,Age)"
 					showAlerts={false}
 					filesLimit={1}
 					onDrop={this.fileUploader1} />
@@ -141,7 +193,7 @@ class Home extends Component {
 					acceptedFiles={[".csv, text/csv, application/vnd.ms-excel, application/csv, text/x-csv, application/x-csv, text/comma-separated-values, text/x-comma-separated-values"]}
 					onChange={this.handleChange.bind(this)}
 					showFileNames
-					dropzoneText="Upload FacultyInfo(FacultyId,LastName,FirstName)"
+					dropzoneText="Upload FacultyInfo(FacultyId,LastName,FirstName,Age)"
 					showAlerts={false}
 					filesLimit={1}
 					onDrop={this.fileUploader2} />
@@ -191,13 +243,7 @@ class Home extends Component {
 					filesLimit={1}
 					onDrop={this.fileUploader7} />
 				<br />
-				<center><Button onClick={this.buildGraph} variant="contained" color="primary">
-					{text}
-				</Button></center>
-				<Link to={{
-					pathname: '/singlestudent',
-					state: [{ student_prob: this.state.student_prob }]
-				}}> CONTINUE </Link>
+				<center>{button}</center>
 			</div>
 		);
 	}

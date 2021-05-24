@@ -34,9 +34,9 @@ def student_upload():
         print("Saving file")
         f = request.files['file']
         path = app.config['UPLOAD_PATH'] + '/StudentInfo.csv'
-        f.save(path)
+        # f.save(path)
 
-        pop_table('contact_data.db', path, create_student)
+        #pop_table('contact_data.db', path, create_student)
         print('Finished populating students')
         return "student_upload test"
 
@@ -47,8 +47,8 @@ def faculty_upload():
         print("Saving file")
         f = request.files['file']
         path = app.config['UPLOAD_PATH'] + '/FacultyInfo.csv'
-        f.save(path)
-        pop_table('contact_data.db', path, create_faculty)
+        # f.save(path)
+        #pop_table('contact_data.db', path, create_faculty)
         return "faculty_upload test"
 
 
@@ -58,8 +58,8 @@ def course_upload():
         print("Saving file")
         f = request.files['file']
         path = app.config['UPLOAD_PATH'] + '/CourseInfo.csv'
-        f.save(path)
-        pop_table('contact_data.db', path, create_course)
+        # f.save(path)
+        #pop_table('contact_data.db', path, create_course)
         return "course_upload test"
 
 
@@ -69,8 +69,8 @@ def room_upload():
         print("Saving file")
         f = request.files['file']
         path = app.config['UPLOAD_PATH'] + '/RoomInfo.csv'
-        f.save(path)
-        pop_table('contact_data.db', path, create_room)
+        # f.save(path)
+        #pop_table('contact_data.db', path, create_room)
         return "room_upload test"
 
 
@@ -80,8 +80,8 @@ def class_upload():
         print("Saving file")
         f = request.files['file']
         path = app.config['UPLOAD_PATH'] + '/ClassInfo.csv'
-        f.save(path)
-        pop_table('contact_data.db', path, create_class)
+        # f.save(path)
+        #pop_table('contact_data.db', path, create_class)
         return "class_upload test"
 
 
@@ -91,8 +91,8 @@ def schedule_upload():
         print("Saving file")
         f = request.files['file']
         path = app.config['UPLOAD_PATH'] + '/ScheduleInfo.csv'
-        f.save(path)
-        pop_table('contact_data.db', path, create_schedule_entry)
+        # f.save(path)
+        #pop_table('contact_data.db', path, create_schedule_entry)
         return "schedule_upload test"
 
 
@@ -102,7 +102,7 @@ def infected_upload():
         print("Saving file")
         f = request.files['file']
         path = app.config['UPLOAD_PATH'] + '/InfectedStudents.csv'
-        f.save(path)
+        # f.save(path)
         return "infected_upload test"
 
 
@@ -128,16 +128,25 @@ def flask_get_neighbors():
         student_id = int(request.data)
         conn = create_connection('contact_data.db')
         neighbor_ids = get_neighbors_ssv(student_id, conn)
-        nodes = [{"id": student_id, "label": str(student_id)}]
+        title = make_title(student_id, student_nodes, conn)
+        nodes = [{"id": student_id, "label": str(student_id), 'title': title}]
         edges = []
         for n in neighbor_ids:
             print(n[0])
+            title = make_title(n[0], student_nodes, conn)
             nodes.append({"id": n[0], "label": str(n[0]),
-                          "color": None, "title": 'works'})
+                          "color": None, "title": title})
             edges.append({"from": student_id, "to": n[0], "length": n[1]})
 
         app_dict = {"nodes": nodes, "edges": edges}
         return json.dumps(app_dict)
+
+
+@app.route('/get_student_nodes', methods=['GET'])
+def flask_get_student_nodes():
+    if request.method == 'GET':
+        print(len(student_nodes))
+        return jsonify(student_nodes)
 
 
 @app.route('/rec_list', methods=['GET'])
@@ -145,13 +154,8 @@ def gen_list():
     if request.method == 'GET':
         print("sending_list")
         conn = create_connection('contact_data.db')
-        # print()
         testing_list = testing_rec_lists(student_nodes, conn)
         rows = []
-        #outfile = open("../public/files/RecList.csv", "w+")
-        #outfile = open(app.config['UPLOAD_PATH'] + "/RecList.csv", "w+")
-        #writer = csv.writer(outfile)
-        #writer.writerow(['student_id', 'risk', 'prob', 'degree', 'age'])
         for s in testing_list:
             rows.append({
                 'student_id': s.student_id,
@@ -160,9 +164,6 @@ def gen_list():
                 'degree': s.degree,
                 'age': s.age
             })
-            # writer.writerow(
-            # [s.student_id, s.tier, s.prob_of_infection, s.degree, s.age])
-        # outfile.close()
 
     return {'row_data': rows}
 
